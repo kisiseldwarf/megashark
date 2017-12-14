@@ -19,6 +19,7 @@ class ShowtimesController extends AppController
      */
     public function index()
     {
+        $this->paginate=['contain' => ['Movies','Rooms']];
         $showtimes = $this->paginate($this->Showtimes);
 
         $this->set(compact('showtimes'));
@@ -52,14 +53,17 @@ class ShowtimesController extends AppController
         $showtime = $this->Showtimes->newEntity();
         if ($this->request->is('post')) {
             $showtime = $this->Showtimes->patchEntity($showtime, $this->request->getData());
+            
             if ($this->Showtimes->save($showtime)) {
                 $this->Flash->success(__('The showtime has been saved.'));
-
                 return $this->redirect(['action' => 'index']);
             }
             $this->Flash->error(__('The showtime could not be saved. Please, try again.'));
         }
-        $this->set(compact('showtime'));
+
+        $movies = $this->Showtimes->Movies->find('list');
+        $rooms = $this->Showtimes->Rooms->find('list');
+        $this->set(compact('showtime','movies','rooms'));
         $this->set('_serialize', ['showtime']);
     }
 
@@ -68,7 +72,7 @@ class ShowtimesController extends AppController
      *
      * @param string|null $id Showtime id.
      * @return \Cake\Http\Response|null Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Network\Exception\NotFoundException When record not found.
+     * @throws \Cake\Network\Exception\NotFeroundException When record not found.
      */
     public function edit($id = null)
     {
@@ -84,6 +88,7 @@ class ShowtimesController extends AppController
             }
             $this->Flash->error(__('The showtime could not be saved. Please, try again.'));
         }
+        
         $this->set(compact('showtime'));
         $this->set('_serialize', ['showtime']);
     }
